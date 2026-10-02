@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 use App\Models\Kelas;
 use App\Models\Pelanggan;
+use App\Models\Kunjungan;
 use App\Models\Cabang;
 use App\Models\ActivityLog;
 use App\Models\ApprovalRequest;
@@ -83,6 +84,7 @@ class PelangganController extends Controller
                             'cabang_id'             => $input['existing_cabang_id'] ?? $pelanggan->cabang_id,
                             'tanggal_kunjungan'     => $input['tanggal_kunjungan'],
                             'biaya'                 => $input['biaya'],
+                            'pemeriksaan'           => !empty($input['pemeriksaan']) ? trim($input['pemeriksaan']) : null,
                             'kelompok_pelanggan_id' => $kelompok?->id,
                             'total_kedatangan'      => 1,
                         ]);
@@ -176,6 +178,7 @@ class PelangganController extends Controller
                         'cabang_id'             => $input['cabang_id'],
                         'tanggal_kunjungan'     => $input['tanggal_kunjungan'],
                         'biaya'                 => $input['biaya'],
+                        'pemeriksaan'           => !empty($input['pemeriksaan']) ? trim($input['pemeriksaan']) : null,
                         'kelompok_pelanggan_id' => $kelompok?->id,
                         'total_kedatangan'      => 1,
                     ]);
@@ -318,7 +321,29 @@ class PelangganController extends Controller
         $tanggal_selesai = $request->tanggal_selesai;
         $kelompokPelanggan = $request->kelompok_pelanggan;
         $tipePelanggan   = $request->tipe_pelanggan;
+        $searchByPemeriksaan = $request->filled('search_by_pemeriksaan') || $request->filled('pemeriksaan');
+        $pemeriksaan         = $searchByPemeriksaan ? trim((string)$request->pemeriksaan) : null;
+        if ($pemeriksaan === '') {
+            $pemeriksaan = null;
+        }
 
+        // Ambil opsi pemeriksaan unik dari database untuk searchable dropdown
+        $rawPemeriksaanList = Kunjungan::whereNotNull('pemeriksaan')
+            ->where('pemeriksaan', '!=', '')
+            ->select('pemeriksaan')
+            ->distinct()
+            ->pluck('pemeriksaan');
+
+        $pemeriksaanOptions = collect();
+        foreach ($rawPemeriksaanList as $item) {
+            $parts = array_map('trim', explode(',', $item));
+            foreach ($parts as $part) {
+                if ($part !== '') {
+                    $pemeriksaanOptions->push($part);
+                }
+            }
+        }
+        $pemeriksaanOptions = $pemeriksaanOptions->unique()->sort()->values();
 
         // Filter cabangs dropdown by accessible cabangs
         /** @var User $user */
@@ -332,25 +357,28 @@ class PelangganController extends Controller
 
         // Tampilkan data kosong saat pertama kali masuk (belum klik filter)
         if (!$type && !$search && !$kelompokPelanggan && !$tipePelanggan
-            && !$cabangId && !$kelas && !$omsetRange && !$kedatanganRange) {
+            && !$cabangId && !$kelas && !$omsetRange && !$kedatanganRange && !$pemeriksaan) {
             return view('pelanggan.index', [
-                'pelanggan'          => collect(),
-                'bulan'              => null,
-                'tahun'              => null,
-                'type'               => 'semua',
-                'search'             => null,
-                'cabang_id'          => null,
-                'omset_range'        => null,
-                'kedatangan_range'   => null,
-                'kelas'              => null,
-                'kelompok_pelanggan' => null,
-                'tipe_pelanggan'     => null,
-                'cabangs'            => $cabangs,
-                'kelasList'          => Kelas::orderedNames(),
-                'sort'               => $sort,
-                'direction'          => $direction,
-                'searchMode'         => false,
-                'isMultiCabang'      => $isMultiCabang,
+                'pelanggan'             => collect(),
+                'bulan'                 => null,
+                'tahun'                 => null,
+                'type'                  => 'semua',
+                'search'                => null,
+                'cabang_id'             => null,
+                'omset_range'           => null,
+                'kedatangan_range'      => null,
+                'kelas'                 => null,
+                'kelompok_pelanggan'    => null,
+                'tipe_pelanggan'        => null,
+                'search_by_pemeriksaan' => $searchByPemeriksaan,
+                'pemeriksaan'           => null,
+                'pemeriksaanOptions'    => $pemeriksaanOptions,
+                'cabangs'               => $cabangs,
+                'kelasList'             => Kelas::orderedNames(),
+                'sort'                  => $sort,
+                'direction'             => $direction,
+                'searchMode'            => false,
+                'isMultiCabang'         => $isMultiCabang,
             ]);
         }
 
@@ -633,6 +661,51 @@ class PelangganController extends Controller
             });
         }
 
+        // Filter Pemeriksaan: Minimal 3 kali kunjungan yang memuat pemeriksaan terkait
+        // '+' = AND (setiap keyword harus minimal 3 kali), ',' = OR (salah satu keyword minimal 3 kali)
+        if ($pemeriksaan) {
+            $pemDateSql = '';
+            if ($type === 'perbulan' && $bulan && $tahun) {
+                $pemDateSql = ' AND MONTH(k2.tanggal_kunjungan) = ' . (int)$bulan . ' AND YEAR(k2.tanggal_kunjungan) = ' . (int)$tahun;
+            } elseif ($type === 'pertahun' && $tahun) {
+                $pemDateSql = ' AND YEAR(k2.tanggal_kunjungan) = ' . (int)$tahun;
+            } elseif ($type === 'range' && $tanggal_mulai && $tanggal_selesai) {
+                $quotedMulai = DB::getPdo()->quote($tanggal_mulai);
+                $quotedSelesai = DB::getPdo()->quote($tanggal_selesai);
+                $pemDateSql = " AND k2.tanggal_kunjungan BETWEEN {$quotedMulai} AND {$quotedSelesai}";
+            }
+
+            if (str_contains($pemeriksaan, '+')) {
+                // Mode AND: Pasien harus memiliki SEMUA pemeriksaan yang dicari, masing-masing MINIMAL 3 kali
+                $keywords = array_values(array_filter(array_map('trim', explode('+', $pemeriksaan))));
+                foreach ($keywords as $kw) {
+                    $quotedKw = DB::getPdo()->quote('%' . $kw . '%');
+                    $query->whereRaw("(
+                        SELECT COUNT(*) FROM kunjungans k2 
+                        WHERE k2.pelanggan_id = pelanggans.id 
+                        AND k2.pemeriksaan LIKE {$quotedKw}
+                        {$pemDateSql}
+                    ) >= 3");
+                }
+            } else {
+                // Mode OR: Pasien memiliki SALAH SATU dari pemeriksaan yang dicari MINIMAL 3 kali
+                $keywords = array_values(array_filter(array_map('trim', explode(',', $pemeriksaan))));
+                if (!empty($keywords)) {
+                    $orConditions = [];
+                    foreach ($keywords as $kw) {
+                        $quotedKw = DB::getPdo()->quote('%' . $kw . '%');
+                        $orConditions[] = "(
+                            SELECT COUNT(*) FROM kunjungans k2 
+                            WHERE k2.pelanggan_id = pelanggans.id 
+                            AND k2.pemeriksaan LIKE {$quotedKw}
+                            {$pemDateSql}
+                        ) >= 3";
+                    }
+                    $query->whereRaw('(' . implode(' OR ', $orConditions) . ')');
+                }
+            }
+        }
+
         if ($sort === 'tgl_kunjungan') {
             $query->orderByRaw("(tgl_kunjungan IS NULL) ASC, tgl_kunjungan {$direction}");
         } elseif ($sort === 'class') {
@@ -691,27 +764,98 @@ class PelangganController extends Controller
             });
         }
 
+        // Hitung informasi terkait pemeriksaan jika filter pemeriksaan aktif
+        if ($pemeriksaan && $pelanggan->isNotEmpty()) {
+            $pelangganIds = $pelanggan->pluck('id');
+            $isAndMode = str_contains($pemeriksaan, '+');
+            $keywords = array_values(array_filter(array_map('trim', explode($isAndMode ? '+' : ',', $pemeriksaan))));
+
+            $kunjunganPemQuery = Kunjungan::whereIn('pelanggan_id', $pelangganIds)
+                ->whereNotNull('pemeriksaan')
+                ->where('pemeriksaan', '!=', '');
+
+            if ($type === 'perbulan' && $bulan && $tahun) {
+                $kunjunganPemQuery->whereMonth('tanggal_kunjungan', $bulan)
+                                  ->whereYear('tanggal_kunjungan', $tahun);
+            } elseif ($type === 'pertahun' && $tahun) {
+                $kunjunganPemQuery->whereYear('tanggal_kunjungan', $tahun);
+            } elseif ($type === 'range' && $tanggal_mulai && $tanggal_selesai) {
+                $kunjunganPemQuery->whereBetween('tanggal_kunjungan', [$tanggal_mulai, $tanggal_selesai]);
+            }
+
+            $userKunjungans = $kunjunganPemQuery->orderBy('tanggal_kunjungan', 'desc')
+                ->orderBy('id', 'desc')
+                ->get()
+                ->groupBy('pelanggan_id');
+
+            $pelanggan->each(function ($p) use ($userKunjungans, $keywords, $isAndMode) {
+                $kList = $userKunjungans->get($p->id, collect());
+                if ($isAndMode) {
+                    $matchedK = $kList->filter(function ($k) use ($keywords) {
+                        $pemeriksaanStr = (string)$k->pemeriksaan;
+                        foreach ($keywords as $kw) {
+                            if (stripos($pemeriksaanStr, $kw) === false) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+                    $p->total_terkait_pemeriksaan = $matchedK->count();
+                    $latestK = $matchedK->first();
+                    $p->tgl_kunjungan_terakhir_terkait = $latestK && $latestK->tanggal_kunjungan
+                        ? Carbon::parse($latestK->tanggal_kunjungan)->format('d-m-Y')
+                        : '-';
+                    $p->pemeriksaan_terakhir_terkait = $latestK ? $latestK->pemeriksaan : '-';
+                } else {
+                    $totalRelated = 0;
+                    $matchedK = collect();
+                    foreach ($kList as $k) {
+                        $pemeriksaanStr = (string)$k->pemeriksaan;
+                        $hasMatch = false;
+                        foreach ($keywords as $kw) {
+                            if (stripos($pemeriksaanStr, $kw) !== false) {
+                                $totalRelated++;
+                                $hasMatch = true;
+                            }
+                        }
+                        if ($hasMatch) {
+                            $matchedK->push($k);
+                        }
+                    }
+                    $p->total_terkait_pemeriksaan = $totalRelated;
+                    $latestK = $matchedK->first();
+                    $p->tgl_kunjungan_terakhir_terkait = $latestK && $latestK->tanggal_kunjungan
+                        ? Carbon::parse($latestK->tanggal_kunjungan)->format('d-m-Y')
+                        : '-';
+                    $p->pemeriksaan_terakhir_terkait = $latestK ? $latestK->pemeriksaan : '-';
+                }
+            });
+        }
+
         return view('pelanggan.index', [
-            'pelanggan'          => $pelanggan,
-            'bulan'              => $bulan,
-            'tahun'              => $tahun,
-            'type'               => $type,
-            'search'             => $search,
-            'cabang_id'          => $cabangId,
-            'omset_range'        => $omsetRange,
-            'kedatangan_range'   => $kedatanganRange,
-            'kelas'              => $kelas,
-            'kelompok_pelanggan' => $kelompokPelanggan,
-            'tanggal_mulai'      => $tanggal_mulai,
-            'tanggal_selesai'    => $tanggal_selesai,
-            'tipe_pelanggan'     => $tipePelanggan,
-            'cabangs'            => $cabangs,
-            'kelasList'          => Kelas::orderedNames(),
-            'sort'               => $sort,
-            'direction'          => $direction,
-            'searchMode'         => (bool) $search,
-            'usePeriodeBiaya'    => ($biayaSubquery !== null),
-            'isMultiCabang'      => $isMultiCabang,
+            'pelanggan'             => $pelanggan,
+            'bulan'                 => $bulan,
+            'tahun'                 => $tahun,
+            'type'                  => $type,
+            'search'                => $search,
+            'cabang_id'             => $cabangId,
+            'omset_range'           => $omsetRange,
+            'kedatangan_range'      => $kedatanganRange,
+            'kelas'                 => $kelas,
+            'kelompok_pelanggan'    => $kelompokPelanggan,
+            'tanggal_mulai'         => $tanggal_mulai,
+            'tanggal_selesai'       => $tanggal_selesai,
+            'tipe_pelanggan'        => $tipePelanggan,
+            'search_by_pemeriksaan' => $searchByPemeriksaan,
+            'pemeriksaan'           => $pemeriksaan,
+            'pemeriksaanOptions'    => $pemeriksaanOptions,
+            'cabangs'               => $cabangs,
+            'kelasList'             => Kelas::orderedNames(),
+            'sort'                  => $sort,
+            'direction'             => $direction,
+            'searchMode'            => (bool) $search,
+            'usePeriodeBiaya'       => ($biayaSubquery !== null),
+            'isMultiCabang'         => $isMultiCabang,
         ]);
     }
 

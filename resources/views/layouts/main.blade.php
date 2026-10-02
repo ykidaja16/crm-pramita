@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Medical Lab CRM')</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logosima.png') }}">
+    <title>@yield('title', 'Pramita Lab CRM')</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/pramita.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    @yield('styles')
 
     <style>
         body {
@@ -61,7 +63,7 @@
             min-height: 100vh;
         }
         #sidebar .sidebar-header {
-            padding: 18px 20px;
+            padding: 16px 15px;
             background: #ffffff;
             position: relative;
         }
@@ -70,39 +72,36 @@
             position: absolute;
             bottom: 0; left: 0; right: 0;
             height: 2px;
-            background: linear-gradient(90deg, #1a4fa0, #1e90ff);
+            background: linear-gradient(90deg, #C8102E, #E8192E);
         }
         .sidebar-hd-inner {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 14px;
+            gap: 6px;
         }
         .sidebar-logo-img {
-            height: 44px;
-            width: auto;
-            max-width: none;
+            height: auto;
+            width: 100%;
+            max-width: 180px;
             flex-shrink: 0;
         }
         .sidebar-brand-name {
             display: block;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #1a3c78;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #C8102E;
             line-height: 1.25;
-            letter-spacing: 0.2px;
+            letter-spacing: 1.5px;
+            text-align: center;
+            text-transform: uppercase;
         }
         .sidebar-brand-name span {
             font-weight: 400;
-            color: #4a6fa5;
+            color: #d44054;
         }
         .sidebar-brand-sub {
-            display: block;
-            font-size: 0.62rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #7a90b0;
-            margin-top: 5px;
-            font-weight: 500;
+            display: none;
         }
         #sidebar ul.components {
             padding: 20px 0;
@@ -128,18 +127,18 @@
             text-align: center;
         }
         #sidebar ul li a:hover {
-            color: #0056b3;
-            background: #f8f9fa;
+            color: #C8102E;
+            background: #fdf6f6;
         }
         #sidebar ul li.active > a {
-            color: #0056b3;
-            background: #e9ecef;
-            border-right: 4px solid #0056b3;
+            color: #C8102E;
+            background: #fce8eb;
+            border-right: 4px solid #C8102E;
         }
         /* Submenu Pelanggan */
         #sidebar .submenu-pelanggan {
             background: #f8f9fa;
-            border-left: 3px solid #0056b3;
+            border-left: 3px solid #C8102E;
             margin-left: 0;
         }
         #sidebar .submenu-pelanggan li a {
@@ -148,13 +147,13 @@
             color: #666;
         }
         #sidebar .submenu-pelanggan li a:hover {
-            color: #0056b3;
-            background: #e9ecef;
+            color: #C8102E;
+            background: #fce8eb;
         }
         #sidebar .submenu-pelanggan li.active > a {
-            color: #0056b3;
-            background: #e9ecef;
-            border-right: 4px solid #0056b3;
+            color: #C8102E;
+            background: #fce8eb;
+            border-right: 4px solid #C8102E;
             font-weight: 600;
         }
         #sidebar .pelanggan-toggle {
@@ -173,7 +172,7 @@
         /* Submenu Approval */
         #sidebar .submenu-approval {
             background: #f8f9fa;
-            border-left: 3px solid #0056b3;
+            border-left: 3px solid #C8102E;
             margin-left: 0;
         }
         #sidebar .submenu-approval li a {
@@ -182,13 +181,13 @@
             color: #666;
         }
         #sidebar .submenu-approval li a:hover {
-            color: #0056b3;
-            background: #e9ecef;
+            color: #C8102E;
+            background: #fce8eb;
         }
         #sidebar .submenu-approval li.active > a {
-            color: #0056b3;
-            background: #e9ecef;
-            border-right: 4px solid #0056b3;
+            color: #C8102E;
+            background: #fce8eb;
+            border-right: 4px solid #C8102E;
             font-weight: 600;
         }
         #sidebar .approval-toggle {
@@ -207,7 +206,7 @@
         /* Submenu Special Day */
         #sidebar .submenu-special-day {
             background: #f8f9fa;
-            border-left: 3px solid #0056b3;
+            border-left: 3px solid #C8102E;
             margin-left: 0;
         }
         #sidebar .submenu-special-day li a {
@@ -216,13 +215,13 @@
             color: #666;
         }
         #sidebar .submenu-special-day li a:hover {
-            color: #0056b3;
-            background: #e9ecef;
+            color: #C8102E;
+            background: #fce8eb;
         }
         #sidebar .submenu-special-day li.active > a {
-            color: #0056b3;
-            background: #e9ecef;
-            border-right: 4px solid #0056b3;
+            color: #C8102E;
+            background: #fce8eb;
+            border-right: 4px solid #C8102E;
             font-weight: 600;
         }
         #sidebar .special-day-toggle {
@@ -259,15 +258,50 @@
             border-radius: 12px 12px 0 0 !important;
         }
         .btn-primary {
-            background: #0056b3;
-            border-color: #0056b3;
+            background: #C8102E;
+            border-color: #C8102E;
         }
-        .btn-success {
-            background: #00a8cc;
-            border-color: #00a8cc;
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active {
+            background: #a30d25 !important;
+            border-color: #a30d25 !important;
         }
-        .badge-primary { background: #0056b3; }
-        .badge-info { background: #00a8cc; }
+        .btn-outline-primary {
+            color: #C8102E;
+            border-color: #C8102E;
+        }
+        .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+            background: #C8102E;
+            border-color: #C8102E;
+            color: #fff;
+        }
+        .text-primary { color: #C8102E !important; }
+        .navbar .bg-primary,
+        #sidebar .bg-primary,
+        .dropdown-menu .bg-primary,
+        .dropdown-menu .badge.bg-primary { background-color: #C8102E !important; }
+        .border-primary { border-color: #C8102E !important; }
+
+        /* Info class overrides → Pramita red accent */
+        .text-info { color: #C8102E !important; }
+        .bg-info { background-color: #C8102E !important; }
+        .bg-info.bg-opacity-10,
+        .bg-info.bg-opacity-15 { background-color: rgba(200,16,46,0.1) !important; }
+        .border-info { border-color: #C8102E !important; }
+        .btn-info {
+            background-color: #C8102E;
+            border-color: #C8102E;
+            color: #fff;
+        }
+        .btn-info:hover, .btn-info:focus, .btn-info:active {
+            background-color: #a30d25 !important;
+            border-color: #a30d25 !important;
+            color: #fff !important;
+        }
+        .badge-info { background: #C8102E; }
+        .badge-primary { background: #C8102E; }
+
+
+
         
         /* ============================================
            RESPONSIVE STYLES - TAMBAHAN UNTUK MOBILE
@@ -623,7 +657,7 @@
     <nav id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-hd-inner">
-                <img src="{{ asset('images/logosima.png') }}" alt="SIMA Lab" class="sidebar-logo-img">
+                <img src="{{ asset('images/pramita.png') }}" alt="Pramita Lab" class="sidebar-logo-img">
                 <div>
                     <span class="sidebar-brand-name">CRM <span>System</span></span>
                     <span class="sidebar-brand-sub">Medical Lab</span>
@@ -812,6 +846,11 @@
                     <i class="fas fa-undo-alt"></i> Riwayat Import
                 </a>
             </li>
+            <li class="{{ request()->routeIs('kunjungan.update-pemeriksaan*') ? 'active' : '' }}">
+                <a href="{{ route('kunjungan.update-pemeriksaan.index') }}" title="Update Pemeriksaan">
+                    <i class="fas fa-notes-medical"></i> Update Pemeriksaan
+                </a>
+            </li>
             @endif
         </ul>
 
@@ -836,8 +875,8 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 {{-- <a class="navbar-brand ms-3 d-flex align-items-center" href="{{ route('dashboard') }}">
-                    <img src="{{ asset('images/logosima.png') }}" alt="SIMA Lab" height="35" class="me-2">
-                    <!-- <span class="fw-bold text-primary">SIMA Lab</span> -->
+                    <img src="{{ asset('images/pramita.png') }}" alt="Pramita Lab" height="35" class="me-2">
+                    <!-- <span class="fw-bold text-primary">Pramita Lab</span> -->
                 </a> --}}
                 <div class="ms-auto d-flex align-items-center gap-2">
                     {{-- Dropdown Profil User --}}
@@ -926,7 +965,7 @@
         
         <!-- Footer Sederhana -->
         <footer class="text-center py-3 bg-white border-top mt-4">
-            <p class="mb-0 text-muted small">&copy; {{ date('Y') }} SIMA Lab CRM System. All rights reserved.</p>
+            <p class="mb-0 text-muted small">&copy; {{ date('Y') }} Pramita Lab CRM System. All rights reserved.</p>
         </footer>
     </div>
 </div>

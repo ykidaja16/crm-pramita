@@ -175,11 +175,91 @@
                             </select>
                         </div>
 
-                        <div class="col-12 d-flex gap-2 mt-1">
-                            <button type="submit" class="btn btn-info px-3">
+                        <!-- Section Search By Pemeriksaan -->
+                        <div class="col-12 my-3">
+                            <div class="card border border-info border-opacity-50 shadow-sm" style="background: linear-gradient(135deg, rgba(13, 202, 240, 0.08) 0%, rgba(255, 255, 255, 0.9) 100%); border-left: 5px solid #0dcaf0 !important; border-radius: 8px;">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="form-check form-switch mb-0">
+                                                <input class="form-check-input" type="checkbox" id="checkSearchPemeriksaan" name="search_by_pemeriksaan" value="1" {{ (($search_by_pemeriksaan ?? false) || !empty($pemeriksaan)) ? 'checked' : '' }} onchange="togglePemeriksaanFilter(this.checked)" style="cursor: pointer; width: 3em; height: 1.5em;">
+                                            </div>
+                                            <div>
+                                                <label class="form-check-label fw-bold text-dark fs-6 mb-0 d-flex align-items-center flex-wrap gap-2" for="checkSearchPemeriksaan" style="cursor: pointer;">
+                                                    <span class="d-inline-flex align-items-center justify-content-center bg-info text-white rounded-circle" style="width: 28px; height: 28px; font-size: 13px;">
+                                                        <i class="fas fa-stethoscope"></i>
+                                                    </span>
+                                                    <span>Search By Pemeriksaan</span>
+                                                    <span class="badge bg-info text-white fw-normal px-2 py-1" style="font-size: 0.75rem;">
+                                                        <i class="fas fa-check-circle me-1"></i>Syarat Min. 3x Kunjungan
+                                                    </span>
+                                                </label>
+                                                <small class="text-muted d-block mt-1">Aktifkan opsi ini untuk memfilter data pasien yang melakukan jenis pemeriksaan tertentu <strong>minimal 3 kali</strong>.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Filter Pemeriksaan: Searchable Dropdown (Muncul saat Search By Pemeriksaan aktif) --}}
+                                    <div id="pemeriksaanBox" class="mt-3 pt-3 border-top border-info border-opacity-25"@if(!($search_by_pemeriksaan ?? false) && empty($pemeriksaan)) style="display: none;"@endif>
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-6 col-lg-5">
+                                                <label class="form-label fw-bold text-dark small mb-1">
+                                                    Pilih / Masukkan Nama Pemeriksaan:
+                                                </label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white text-info border-end-0">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                    <input type="text" 
+                                                           name="pemeriksaan" 
+                                                           id="pemeriksaanInput" 
+                                                           class="form-control border-start-0 ps-0" 
+                                                           list="pemeriksaanDatalist" 
+                                                           value="{{ $pemeriksaan ?? '' }}" 
+                                                           placeholder="Ketik pemeriksaan (contoh: Asam Urat, Glukosa)..."
+                                                           autocomplete="off">
+                                                    <button class="btn btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Pilih dari daftar"></button>
+                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="max-height: 250px; overflow-y: auto;">
+                                                        <li><h6 class="dropdown-header">Daftar Pemeriksaan</h6></li>
+                                                        @if(isset($pemeriksaanOptions) && $pemeriksaanOptions->count() > 0)
+                                                            @foreach($pemeriksaanOptions as $opt)
+                                                                <li>
+                                                                    <a class="dropdown-item small" href="javascript:void(0)" onclick="selectPemeriksaan('{{ addslashes($opt) }}')">
+                                                                        {{ $opt }}
+                                                                    </a>
+                                                                </li>
+                                                            @endforeach
+                                                        @else
+                                                            <li><span class="dropdown-item text-muted small">Belum ada data pemeriksaan</span></li>
+                                                        @endif
+                                                    </ul>
+                                                    <datalist id="pemeriksaanDatalist">
+                                                        @if(isset($pemeriksaanOptions))
+                                                            @foreach($pemeriksaanOptions as $opt)
+                                                                <option value="{{ $opt }}">
+                                                            @endforeach
+                                                        @endif
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-7">
+                                                <div class="p-2 rounded bg-white bg-opacity-75 border border-info border-opacity-25 small text-secondary">
+                                                    <i class="fas fa-info-circle text-info me-1"></i>
+                                                    Gunakan <strong>koma (,)</strong> untuk kondisi <strong>ATAU</strong> (salah satu min. 3x), atau tanda <strong>plus (+)</strong> untuk kondisi <strong>DAN</strong> (semuanya masing-masing min. 3x).
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Aksi Filter -->
+                        <div class="col-12 d-flex gap-2 pt-3 border-top mt-2">
+                            <button type="submit" class="btn btn-info px-4 py-2 fw-semibold">
                                 <i class="fas fa-filter me-2"></i>Terapkan Filter
                             </button>
-                            <a href="{{ route('pelanggan.index') }}" class="btn btn-outline-secondary px-3">
+                            <a href="{{ route('pelanggan.index') }}" class="btn btn-outline-secondary px-4 py-2">
                                 <i class="fas fa-times me-2"></i>Reset Filter
                             </a>
                         </div>
@@ -246,6 +326,7 @@
                             'kedatangan_range'   => $kedatangan_range ?? '',
                             'kelompok_pelanggan' => $kelompok_pelanggan ?? '',
                             'tipe_pelanggan'     => $tipe_pelanggan ?? '',
+                            'pemeriksaan'        => $pemeriksaan ?? '',
                             'tanggal_mulai'      => $tanggal_mulai ?? '',
                             'tanggal_selesai'    => $tanggal_selesai ?? '',
                         ]) }}" class="btn btn-success btn-sm" id="exportAllBtn">
@@ -256,9 +337,16 @@
                 </div>
 
                 <div class="card-body p-0">
+                    @if(!empty($pemeriksaan))
+                    <style>
+                        .table-pemeriksaan-active {
+                            min-width: 1500px !important;
+                        }
+                    </style>
+                    @endif
                     @if(isset($pelanggan) && method_exists($pelanggan, 'count') && $pelanggan->count() > 0)
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped mb-0 align-middle small" style="min-width: 1200px;">
+                        <table class="table table-hover table-striped mb-0 align-middle small {{ !empty($pemeriksaan) ? 'table-pemeriksaan-active' : '' }}" style="min-width: 1200px;">
                             <thead class="table-light">
                                 <tr>
                                     @if(in_array($role, ['Admin', 'Super Admin']))
@@ -304,7 +392,7 @@
                                     </th>
                                     <th class="py-2 text-center" style="width: 65px;">
                                         <a href="{{ route('pelanggan.index', array_merge(request()->all(), ['sort' => 'total_kedatangan', 'direction' => ($sort ?? '') == 'total_kedatangan' && ($direction ?? '') == 'asc' ? 'desc' : 'asc'])) }}" class="text-decoration-none text-dark fw-semibold">
-                                            Kunjungan <i class="fas fa-sort{{ ($sort ?? '') == 'total_kedatangan' ? (($direction ?? '') == 'asc' ? '-up' : '-down') : '' }} text-muted ms-1"></i>
+                                            Total Kunjungan <i class="fas fa-sort{{ ($sort ?? '') == 'total_kedatangan' ? (($direction ?? '') == 'asc' ? '-up' : '-down') : '' }} text-muted ms-1"></i>
                                         </a>
                                     </th>
                                     <th class="py-2 text-center" style="width: 100px;">
@@ -312,6 +400,11 @@
                                             Kunjungan Terakhir <i class="fas fa-sort{{ ($sort ?? '') == 'tgl_kunjungan' ? (($direction ?? '') == 'asc' ? '-up' : '-down') : '' }} text-muted ms-1"></i>
                                         </a>
                                     </th>
+                                    @if(!empty($pemeriksaan))
+                                    <th class="py-2 text-center text-info fw-semibold" style="min-width: 110px;">Total Terkait Pemeriksaan</th>
+                                    <th class="py-2 text-info fw-semibold" style="min-width: 180px;">Pemeriksaan Terakhir</th>
+                                    <th class="py-2 text-center text-info fw-semibold" style="min-width: 130px;">Tanggal Kunjungan Terakhir Terkait Pemeriksaan</th>
+                                    @endif
                                     <th class="py-2 text-end" style="width: 100px;">
                                         <a href="{{ route('pelanggan.index', array_merge(request()->all(), ['sort' => 'total_biaya', 'direction' => ($sort ?? '') == 'total_biaya' && ($direction ?? '') == 'asc' ? 'desc' : 'asc'])) }}" class="text-decoration-none text-dark fw-semibold">
                                             Total Biaya <i class="fas fa-sort{{ ($sort ?? '') == 'total_biaya' ? (($direction ?? '') == 'asc' ? '-up' : '-down') : '' }} text-muted ms-1"></i>
@@ -371,6 +464,15 @@
                                         </span>
                                     </td>
                                     <td class="py-2 text-center text-nowrap small">{{ $p->tgl_kunjungan }}</td>
+                                    @if(!empty($pemeriksaan))
+                                    <td class="py-2 text-center">
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info small">{{ $p->total_terkait_pemeriksaan ?? 0 }}</span>
+                                    </td>
+                                    <td class="py-2 small text-wrap" style="max-width: 250px;">
+                                        {{ $p->pemeriksaan_terakhir_terkait ?? '-' }}
+                                    </td>
+                                    <td class="py-2 text-center text-nowrap small">{{ $p->tgl_kunjungan_terakhir_terkait ?? '-' }}</td>
+                                    @endif
                                     <td class="py-2 text-end fw-semibold text-nowrap small">
                                         Rp {{ number_format($usePeriodeBiaya ? ($p->biaya_periode ?? 0) : ($p->total_biaya ?? $p->kunjungans->sum('biaya')), 0, ',', '.') }}
                                     </td>
@@ -711,6 +813,92 @@ function openNaikKelasModal() {
     if (checked.length === 0) { alert('Tidak ada pelanggan yang dipilih.'); return; }
     const modal = new bootstrap.Modal(document.getElementById('naikKelasModal'));
     modal.show();
+}
+
+// =============================================
+// PEMERIKSAAN AUTOCOMPLETE & FILTER LOGIC
+// =============================================
+</script>
+<script id="pemeriksaanOptionsData" type="application/json">{!! json_encode(isset($pemeriksaanOptions) ? $pemeriksaanOptions->values()->toArray() : []) !!}</script>
+<script>
+const allPemeriksaanOptions = JSON.parse(document.getElementById('pemeriksaanOptionsData')?.textContent || '[]');
+
+function updatePemeriksaanDatalist() {
+    const pemInput = document.getElementById('pemeriksaanInput');
+    const pemDatalist = document.getElementById('pemeriksaanDatalist');
+    if (!pemInput || !pemDatalist) return;
+
+    const val = pemInput.value;
+    const lastComma = val.lastIndexOf(',');
+    const lastPlus  = val.lastIndexOf('+');
+    const lastDelimIdx = Math.max(lastComma, lastPlus);
+
+    let prefix = '';
+    let currentToken = '';
+
+    if (lastDelimIdx !== -1) {
+        const delim = val[lastDelimIdx];
+        const beforeDelim = val.substring(0, lastDelimIdx).trim();
+        prefix = beforeDelim ? (beforeDelim + ' ' + delim + ' ') : (delim + ' ');
+        currentToken = val.substring(lastDelimIdx + 1).trim();
+    } else {
+        currentToken = val.trim();
+    }
+
+    const tokenLower = currentToken.toLowerCase();
+    const matched = tokenLower 
+        ? allPemeriksaanOptions.filter(function(opt) { return opt.toLowerCase().indexOf(tokenLower) !== -1; })
+        : allPemeriksaanOptions;
+
+    let html = '';
+    matched.slice(0, 50).forEach(function(opt) {
+        const fullVal = prefix ? (prefix + opt) : opt;
+        html += '<option value="' + fullVal.replace(/"/g, '&quot;') + '">';
+    });
+    pemDatalist.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const pemInput = document.getElementById('pemeriksaanInput');
+    if (pemInput) {
+        pemInput.addEventListener('input', updatePemeriksaanDatalist);
+        pemInput.addEventListener('focus', updatePemeriksaanDatalist);
+        updatePemeriksaanDatalist();
+    }
+});
+
+function togglePemeriksaanFilter(isChecked) {
+    const box = document.getElementById('pemeriksaanBox');
+    const input = document.getElementById('pemeriksaanInput');
+    if (box) {
+        box.style.display = isChecked ? '' : 'none';
+    }
+    if (!isChecked && input) {
+        input.value = '';
+    }
+}
+
+function selectPemeriksaan(val) {
+    const input = document.getElementById('pemeriksaanInput');
+    if (!input) return;
+    const current = input.value;
+    const lastComma = current.lastIndexOf(',');
+    const lastPlus  = current.lastIndexOf('+');
+    const lastDelimIdx = Math.max(lastComma, lastPlus);
+
+    if (lastDelimIdx === -1) {
+        if (!current.trim()) {
+            input.value = val;
+        } else {
+            input.value = current.trim() + ', ' + val;
+        }
+    } else {
+        const delim = current[lastDelimIdx];
+        const beforeDelim = current.substring(0, lastDelimIdx).trim();
+        input.value = (beforeDelim ? beforeDelim + ' ' + delim + ' ' : delim + ' ') + val;
+    }
+    input.focus();
+    updatePemeriksaanDatalist();
 }
 </script>
 @endsection

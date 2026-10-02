@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Medical Lab CRM</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logosima.png') }}">
+    <title>Login - Pramita Lab CRM</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/pramita.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -26,7 +26,7 @@
             border: none;
         }
         .login-header {
-            background: linear-gradient(135deg, #0056b3 0%, #00a8cc 100%);
+            background: linear-gradient(135deg, #C8102E 0%, #E8192E 100%);
             color: white;
             padding: 30px 20px;
             text-align: center;
@@ -50,12 +50,12 @@
             background-color: #f8f9fa;
         }
         .form-control:focus {
-            border-color: #00a8cc;
-            box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.1);
+            border-color: #C8102E;
+            box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
             background-color: white;
         }
         .btn-login {
-            background: #0056b3;
+            background: #C8102E;
             border: none;
             border-radius: 8px;
             padding: 12px;
@@ -64,9 +64,9 @@
             transition: all 0.3s;
         }
         .btn-login:hover {
-            background: #004494;
+            background: #a30d25;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 86, 179, 0.3);
+            box-shadow: 0 5px 15px rgba(200, 16, 46, 0.3);
         }
         .alert-danger {
             border-radius: 8px;
@@ -78,7 +78,7 @@
 
     <div class="login-card">
         <div class="login-header">
-            <img src="{{ asset('images/logosima.png') }}" alt="SIMA Lab Logo" style="height: 80px; margin-bottom: 15px;">
+            <img src="{{ asset('images/pramita.png') }}" alt="Pramita Lab Logo" style="height: 80px; margin-bottom: 15px;">
          
             <p>Customer Relationship Management</p>
         </div>

@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Riwayat Import - SIMA Lab')
+@section('title', 'Riwayat Import - Pramita Lab')
 
 @section('content')
 <div class="container-fluid">
@@ -170,11 +170,7 @@
                                     <button type="button"
                                             class="btn btn-danger btn-sm"
                                             title="Rollback import ini"
-                                            onclick="confirmRollback(
-                                                '{{ $batch->batch_id }}',
-                                                '{{ addslashes($batch->filename) }}',
-                                                {{ $batch->total_rows }}
-                                            )">
+                                            onclick="confirmRollback('{{ $batch->batch_id }}', '{{ addslashes($batch->filename) }}', '{{ $batch->total_rows }}')">
                                         <i class="fas fa-undo-alt me-1"></i>Rollback
                                     </button>
                                 @elseif($batch->isRolledBack())

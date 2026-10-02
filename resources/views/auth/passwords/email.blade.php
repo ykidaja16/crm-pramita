@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Medical Lab CRM</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logosima.png') }}">
+    <title>Reset Password - Pramita Lab CRM</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/pramita.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a4fa0 0%, #1e90ff 100%);
+            background: linear-gradient(135deg, #C8102E 0%, #E8192E 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -49,24 +49,24 @@
             display: block;
             font-size: 1.05rem;
             font-weight: 700;
-            color: #1a3c78;
+            color: #C8102E;
             letter-spacing: 0.2px;
             line-height: 1.25;
         }
-        .login-brand-name span { font-weight: 400; color: #4a6fa5; }
+        .login-brand-name span { font-weight: 400; color: #d44054; }
         .login-brand-sub {
             display: block;
             font-size: 0.62rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: #7a90b0;
+            color: #b07a7a;
             font-weight: 500;
             margin-top: 5px;
         }
 
         .login-divider {
             height: 1px;
-            background: linear-gradient(90deg, transparent, #dde6f5, transparent);
+            background: linear-gradient(90deg, transparent, #f5dde0, transparent);
             margin-bottom: 28px;
         }
 
@@ -77,12 +77,12 @@
         .reset-title h5 {
             font-size: 1.25rem;
             font-weight: 700;
-            color: #1a3c78;
+            color: #C8102E;
             margin-bottom: 4px;
         }
         .reset-title p {
             font-size: 0.83rem;
-            color: #8a9bb5;
+            color: #b58a8a;
             margin: 0 0 24px;
             line-height: 1.5;
         }
@@ -99,17 +99,17 @@
         .form-control {
             border-radius: 10px;
             padding: 11px 15px;
-            border: 1.5px solid #e4ecf7;
-            background: #f6f9fd;
+            border: 1.5px solid #f7e4e6;
+            background: #fdf6f6;
             font-size: 0.9rem;
             color: #2d3a50;
             transition: all 0.2s;
         }
         .form-control::placeholder { color: #b0bccf; }
         .form-control:focus {
-            border-color: #1a4fa0;
+            border-color: #C8102E;
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(26,79,160,0.1);
+            box-shadow: 0 0 0 3px rgba(200,16,46,0.1);
             outline: none;
         }
         .input-icon-wrap { position: relative; }
@@ -125,7 +125,7 @@
         .input-icon-wrap .form-control { padding-left: 38px; }
 
         .btn-reset {
-            background: linear-gradient(135deg, #1a4fa0 0%, #1e90ff 100%);
+            background: linear-gradient(135deg, #C8102E 0%, #E8192E 100%);
             border: none;
             border-radius: 10px;
             padding: 13px;
@@ -135,12 +135,12 @@
             color: #fff;
             letter-spacing: 0.4px;
             transition: all 0.25s;
-            box-shadow: 0 4px 16px rgba(26,79,160,0.3);
+            box-shadow: 0 4px 16px rgba(200,16,46,0.3);
             margin-top: 4px;
         }
         .btn-reset:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(26,79,160,0.4);
+            box-shadow: 0 8px 24px rgba(200,16,46,0.4);
             color: #fff;
         }
         .btn-reset:active { transform: translateY(0); }
@@ -155,7 +155,7 @@
             transition: color 0.2s;
         }
         .back-link i { font-size: 0.75rem; }
-        .back-link:hover { color: #1a4fa0; }
+        .back-link:hover { color: #C8102E; }
 
         .alert-success {
             border-radius: 10px;
@@ -191,7 +191,7 @@
     <div class="reset-card">
 
         <div class="login-brand">
-            <img src="{{ asset('images/logosima.png') }}" alt="SIMA Lab" class="login-logo">
+            <img src="{{ asset('images/pramita.png') }}" alt="Pramita Lab" class="login-logo">
             <div>
                 <span class="login-brand-name">CRM <span>System</span></span>
                 <span class="login-brand-sub">Medical Lab</span>
@@ -238,7 +238,7 @@
 
     </div>
 
-    <p class="login-footer">&copy; {{ date('Y') }} SIMA Lab &mdash; Medical Lab CRM System</p>
+    <p class="login-footer">&copy; {{ date('Y') }} Pramita Lab &mdash; Medical Lab CRM System</p>
 
 </body>
 </html>
